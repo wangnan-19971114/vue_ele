@@ -1,0 +1,153 @@
+***********************8.24*****************************************************
+vuex当中的actions方法返回的是一个Promise.
+在你的actions方法当中创建一个Promise，并将该Promise进行返回.
+详见：store->admin->index.js-->actions->adminlogin
+************
+token传递：
+    axios的请求拦截器
+    axios.interceptors.request.use(config=>{
+        // config 是axios的配置信息.
+        // console.log(config);
+        if(localStorage.token){
+            config.headers = {
+                authorization:localStorage.token
+            }
+        }
+
+
+        store.commit("CHANGE_LOADING",true);
+        config.url = "/ele"+config.url;
+        return config;
+    })
+后端接收：
+    req.headers.authorization
+*********************************************************
+ngins反向代理：
+        location /ele {
+            rewrite ^/ele/(.*)$ /$1 break;
+            proxy_pass http://127.0.0.1;
+        }
+***************************************************
+1、将你的mongodb所在的文件夹上传到服务器。
+    mongod --dbpath c:文件地址
+2、将打包的文件上传到服务器。
+    将vue.config.js 当中的代理中的target地址改为服务器上的接口地址
+3、将API文件上传到服务器。
+***********************8.23*****************************************************
+1、nginx
+Nginx (engine x) 是一个高性能的HTTP和反向代理web服务器
+其将源代码以类BSD许可证的形式发布，因它的稳定性、丰富的功能集、示例配置文件和低系统资源的消耗而闻名。
+2011年6月1日，nginx 1.0.4发布。
+Nginx是一款轻量级的Web 服务器/反向代理服务器及电子邮件（IMAP/POP3）代理服务器，在BSD-like 协议下发行。
+其特点是占有内存少，并发能力强，事实上nginx的并发能力确实在同类型的网页服务器中表现较好.
+中国大陆使用nginx网站用户有：百度、京东、新浪、网易、腾讯、淘宝等。
+正向代理：代理的是客户端。
+反向代理：代理的是服务器。
+下载地址：http://nginx.org/en/download.html
+下载完以后是一个压缩包：
+    1、将其解压缩
+    2、进入到con->nginx.conf
+        #代理注释
+    3、配置
+         server {
+            // 设置商品号
+            listen       80;
+            // 设置host
+            server_name  127.0.0.1;
+            error_page  404              /404.html;
+            location / {
+                // 站点目录
+                root   html;
+                // 打开的默认文件
+                index  index.html index.htm;
+            }
+         }
+    4、命令
+    、   1、start nginx:运行nginx服务（在q解压包的根目录运行）
+              1、运行http://127.0.0.1   查看是否可以打开页面。看到的页面，即是通过nginx服务提供的
+              2、任务管理器-》详情-》nginx.exe   :是否在运行
+              3、不要重复执行该命令！不要重复执行该命令！不要重复执行该命令！
+         2、nginx -s reload 重启
+            nginx -s stop:强制停止
+            nginx -s quite：当你的连接结束之后再退出。
+*:vue-router下的mode设置为history,在生产环境当中需要对地址进行重定向。
+******************************************
+1、登陆
+    前端：
+    1、账号密码验证成功后发送POST请求
+    2、接收
+        失败：提示失败
+        成功：
+            保存token,adminName.
+    接口：
+    1、接收数据
+    2、对你的密码进行MD5加密。盐料
+    3、数据库进行匹配，成功以后增加一条登陆日志，然后进行返回登陆的结果。
+        1、成功
+            返回的信息当中包含一个token,还有一个adminName.
+        2、失败
+    **************axios拦截器******************
+    请求拦截
+    // 请求拦截,可以将请求的配置进行二次处理。
+    axios.interceptors.request.use(config=>{
+        // config 是axios的配置信息.
+        console.log(config);
+        config.url = "/ele"+config.url;
+        return config;
+    })
+    响应拦截
+    // 响应拦截
+    axios.interceptors.response.use(({data})=>{
+        // 返回的值即是axios得到的值
+         return data;
+    })
+    ***************************************
+    *vue.config.js当中的内容发生变化需要重启服务。
+    module.exports = {
+        devServer:{
+            open:true,
+            host:"127.0.0.1",
+            port:8081,
+            // 反向代理。
+            proxy:{
+                // htttp://127.0.0.1:8081/ele/lala
+                // 当访问的地址以/ele开头意味着，你要使用该代理
+                "^/ele":{
+                    // 代理的服务器地址
+                    target:"http://127.0.0.1",
+                    // 是否开启代理
+                    changeOrigin:true,// http://127.0.0.1/lala
+                    // 地址重写
+                    pathRewrite:{
+                        "^/ele":""
+                    }
+                }
+            }
+        }
+    }
+    ******************md5加密********************************
+    1、下载md5
+        cnpm install md5 -S
+    2、引入
+        const md5 = require("md5")
+    3、使用
+        md5(加密的内容);
+    *******************token********************************************
+    token:令牌。
+        流程：
+            1、在你登陆时服务器端生成
+                服务器生成时会荷载你的管理员信息以及过期时间。
+            2、前端得到token后对其进行缓存
+            3、缓存以后在使用私密接口时，需要传递token
+                后端接收到token后会对其进行解析。1、是否是服务器端生成的。2、查看是否过期。
+    制作token:
+        1、下载  jwt-->json web token
+            cnpm install jwt-simple -S
+        2、引入
+            const jwt = require("jwt-simple");
+        3、使用
+            1、生成token
+                jwt.encode(json数据，密钥)
+            2、解析token
+                jwt.decode(token,密钥)
+2、退出

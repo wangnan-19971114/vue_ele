@@ -1,0 +1,27 @@
+export default[
+    {
+        name:"shopType",
+        path:"/shopType",
+        component:()=>import("@/views/shopping/shopTtpe.vue"),
+        meta:{
+            //增加授权
+            isAuthorization:true,
+        }
+    },
+    {
+        name:"shop",
+        path:"/shop",
+        component:()=>import("@/views/shopping/shop.vue"),
+        meta:{
+            isAuthorization:true,
+        }
+    },
+    {
+        name:"commodityType",
+        path:"/commodityType",
+        component:()=>import("@/views/shopping/commodityType.vue"),
+        meta:{
+            isAuthorization:true,
+        }
+    }
+]
